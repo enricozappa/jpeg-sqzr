@@ -1,0 +1,23 @@
+{
+  "name": "auto-jpeg-compressor",
+  "version": "1.0.0",
+  "description": "nodeJS jpeg compressor that reduce one or multiple images to desired size",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enricozappa/auto-jpeg-compressor.git"
+  },
+  "author": "Enrico Zappalà",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/enricozappa/auto-jpeg-compressor/issues"
+  },
+  "homepage": "https://github.com/enricozappa/auto-jpeg-compressor#readme",
+  "dependencies": {
+    "commander": "^9.0.0",
+    "sharp": "^0.30.1"
+  }
+}
