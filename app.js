@@ -4,7 +4,7 @@ const sharp = require('sharp');
 const { program } = require('commander');
 
 program
-    .option('-s, --size <integer>', 'set desired size in KB, max allowed value is 2048')
+    .option('-s, --size <integer>', 'set desired size in KB, max allowed value is 2048');
 
 program.parse();
 
@@ -14,7 +14,7 @@ const requestedSize = Number.parseInt(options.size);
 // Check if size parameter exists and if it's a number
 if (requestedSize)
     if (requestedSize <= 2048)
-        console.log('\x1b[35m%s\x1b[0m', '\nOutput desired size =>', `~ ${requestedSize} KB`);
+        console.log('\x1b[35m%s\x1b[0m', '\nDesired size =>', `~ ${requestedSize} KB`);
     else
         return console.log('\x1b[31m%s\x1b[0m', `\nError: max allowed KB value is 2048"\n`);
 else
@@ -62,6 +62,24 @@ fs.readdir(sourcePath, (err, files) => {
                         .toFile(`${destinationPath}/${file}`, (err, info) => {
                             if (err)
                                 return console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+
+                            // Check if file size is closer to user request
+                            // console.log('Requested size in bytes ==>', getBytes(requestedSize));
+                            // console.log('Final size in bytes ==>', parseInt(info.size));
+                            // console.log('Percentage =>', getPercentage(getBytes(requestedSize), parseInt(info.size)));
+
+                            let threshold = getPercentage(getBytes(requestedSize), parseInt(info.size));
+
+                            if (threshold < 90) {
+                                console.log("too big");
+                                // TODO: decrease quality
+                            } else if (threshold > 115) {
+                                console.log("too small");
+                                // TODO: increase quality
+                            } else {
+                                console.log("right size");
+                                // TODO: output file
+                            }
             
                             console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
                             console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
@@ -77,7 +95,7 @@ fs.readdir(sourcePath, (err, files) => {
     }
 });
 
-// Convert bytes
+// Convert from bytes
 function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
 
@@ -90,3 +108,12 @@ function formatBytes(bytes, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+// Convert to bytes
+function getBytes(value) {
+    return value * 1024;
+}
+
+// Get percentage
+function getPercentage(partialValue, totalValue) {
+    return parseInt((100 * partialValue) / totalValue);
+ } 
