@@ -116,4 +116,4 @@ function getBytes(value) {
 // Get percentage
 function getPercentage(partialValue, totalValue) {
     return parseInt((100 * partialValue) / totalValue);
- } 
+} 
