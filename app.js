@@ -11,89 +11,95 @@ program.parse();
 const options = program.opts();
 const requestedSize = Number.parseInt(options.size);
 
-// Check if size parameter exists and if it's a number
-if (requestedSize)
-    if (requestedSize <= 2048)
-        console.log('\x1b[35m%s\x1b[0m', '\nDesired size =>', `~ ${requestedSize} KB`);
-    else
-        return console.log('\x1b[31m%s\x1b[0m', `\nError: max allowed KB value is 2048"\n`);
-else
-    return console.log('\x1b[31m%s\x1b[0m', `\nError: you must provide a size in KB. Example: node app.js -s 500"\n`);
+compressJPG();
 
-// Get images path
-const sourcePath = path.join(__dirname, 'input');
-const destinationPath = path.join(__dirname, 'output');
-
-// Read images path
-fs.readdir(sourcePath, (err, files) => {
-    if (err)
-        return console.log('\x1b[31m%s\x1b[0m', `\nUnable to scan directory: ${err}`);
-    
-    // Parse files
-    if (files.length) {
-        // Store all images (jpegs)
-        const images = Object.values(files).filter(file => file.split('.')[1] == 'jpg');
-
-        if (images.length) {
-            console.log('\x1b[36m%s\x1b[0m', `\nProcessing ${images.length} files... \n`);
-
-            images.forEach(file => {
-                // Get path
-                const filePath = `${sourcePath}/${file}`;
-
-                // Get file statistics
-                fs.stat(filePath, (error, stats) => {
-                    if (error)
-                      console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
-
-                    // Parse file
-                    fs.readFile(filePath, (err, data) => {
-                        if (err) {
-                            return console.error(err);
-                        }
-
-                        // Compress image
-                        sharp(data)
-                        .jpeg({
-                            quality: 90,
-                            chromaSubsampling: '4:2:0'
-                        })
-                        .resize(1500)
-                        .toFile(`${destinationPath}/${file}`, (err, info) => {
-                            if (err)
-                                return console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
-
-                            // Check if file size is closer to user request
-                            // console.log('Requested size in bytes ==>', getBytes(requestedSize));
-                            // console.log('Final size in bytes ==>', parseInt(info.size));
-                            // console.log('Percentage =>', getPercentage(getBytes(requestedSize), parseInt(info.size)));
-
-                            let threshold = getPercentage(getBytes(requestedSize), parseInt(info.size));
-
-                            if (threshold < 90) {
-                                console.log("too big");
-                                // TODO: decrease quality
-                            } else if (threshold > 115) {
-                                console.log("too small");
-                                // TODO: increase quality
-                            } else {
-                                console.log("right size");
-                                // TODO: output file
-                            }
-            
-                            console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
-                            console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
-                        });
-                    })
-                  });
-            });
+function compressJPG() {
+    // Check if size parameter exists and if it's a number
+    if (requestedSize) {
+        if (requestedSize <= 2048) {
+            console.log('\x1b[35m%s\x1b[0m', '\nDesired size =>', `~ ${requestedSize} KB`);
         } else {
-            console.log('\x1b[33m%s\x1b[0m', '\nWarning: No jpegs found \n');
+            return console.log('\x1b[31m%s\x1b[0m', `\nError: max allowed KB value is 2048"\n`);
         }
     } else {
-        console.log('\x1b[33m%s\x1b[0m', '\nWarning: Images folder is empty \n');
+        return console.log('\x1b[31m%s\x1b[0m', `\nError: you must provide a size in KB. Example: node app.js -s 500"\n`);
     }
-});
+
+    // Get images path
+    const sourcePath = path.join(__dirname, 'input');
+    const destinationPath = path.join(__dirname, 'output');
+
+    // Read images path
+    fs.readdir(sourcePath, (err, files) => {
+        if (err)
+            return console.log('\x1b[31m%s\x1b[0m', `\nUnable to scan directory: ${err}`);
+        
+        // Parse files
+        if (files.length) {
+            // Store all images (jpegs)
+            const images = Object.values(files).filter(file => file.split('.')[1] == 'jpg');
+
+            if (images.length) {
+                console.log('\x1b[36m%s\x1b[0m', `\nProcessing ${images.length} files... \n`);
+
+                images.forEach(file => {
+                    // Get path
+                    const filePath = `${sourcePath}/${file}`;
+
+                    // Get file statistics
+                    fs.stat(filePath, (error, stats) => {
+                        if (error)
+                        console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+
+                        // Parse file
+                        fs.readFile(filePath, (err, data) => {
+                            if (err) {
+                                return console.error(err);
+                            }
+
+                            // Compress image
+                            sharp(data)
+                            .jpeg({
+                                quality: 90,
+                                chromaSubsampling: '4:2:0'
+                            })
+                            .resize(1500)
+                            .toFile(`${destinationPath}/${file}`, (err, info) => {
+                                if (err)
+                                    return console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+
+                                // Check if file size is closer to user request
+                                // console.log('Requested size in bytes ==>', getBytes(requestedSize));
+                                // console.log('Final size in bytes ==>', parseInt(info.size));
+                                // console.log('Percentage =>', getPercentage(getBytes(requestedSize), parseInt(info.size)));
+
+                                let threshold = getPercentage(getBytes(requestedSize), parseInt(info.size));
+
+                                if (threshold < 90) {
+                                    console.log("too big");
+                                    // TODO: decrease quality
+                                } else if (threshold > 115) {
+                                    console.log("too small");
+                                    // TODO: increase quality
+                                } else {
+                                    console.log("right size");
+                                    // TODO: output file
+                                }
+                
+                                console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
+                                console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
+                            });
+                        })
+                    });
+                });
+            } else {
+                console.log('\x1b[33m%s\x1b[0m', '\nWarning: No jpegs found \n');
+            }
+        } else {
+            console.log('\x1b[33m%s\x1b[0m', '\nWarning: Images folder is empty \n');
+        }
+    });
+}
 
 // Convert from bytes
 function formatBytes(bytes, decimals = 2) {
