@@ -5,6 +5,9 @@ const { program } = require('commander');
 
 // TODO: add console animated cursor when compressing
 
+// Store starting time
+const timeStarted = Date.now();
+
 program
     .option('-s, --size <integer>', 'set desired size in KB, max allowed value is 2048')
     .option('-v, --verbose', 'launch in verbose mode');
@@ -14,6 +17,8 @@ program.parse();
 
 const options = program.opts();
 const requestedSize = Number.parseInt(options.size);
+let totalImages = 0;
+let imagesProcessed = 0;
 
 main();
 
@@ -44,9 +49,10 @@ function main() {
             const images = Object.values(files).filter(file => file.split('.')[1] == 'jpg');
 
             if (images.length) {
-                console.log('\x1b[36m%s\x1b[0m', `\nProcessing ${images.length} files... \n`);
+                console.log('\x1b[36m%s\x1b[0m', `\nProcessing ${images.length} files...`);
 
                 images.forEach(file => {
+                    totalImages = images.length;
                     // Get path
                     const filePath = `${sourcePath}/${file}`;
 
@@ -102,6 +108,15 @@ async function compressImage(file, stats, data, destinationPath, quality) {
             console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
             console.log('\x1b[33m%s\x1b[0m', `Quality: ${quality}`);
             console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
+
+            // Increase image processed counter
+            imagesProcessed++;
+
+            // When all images are processed, print elapsed time
+            if (imagesProcessed == totalImages) {
+                console.log('\x1b[35m%s\x1b[0m', `All done! Process took ${parseInt((Date.now() - timeStarted) / 1000)} seconds.\n`);
+            }
+
             return;
         }
     });
