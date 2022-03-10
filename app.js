@@ -59,7 +59,7 @@ function main() {
                     // Get file statistics
                     fs.stat(filePath, (error, stats) => {
                         if (error)
-                        console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+                            console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${error}`);
 
                         // Parse file
                         fs.readFile(filePath, (err, data) => {
@@ -83,6 +83,8 @@ function main() {
 }
 
 async function compressImage(file, stats, data, destinationPath, quality) {
+    // TODO: if original jpeg size is smaller then desired size, prevent compression and log a message
+
     sharp(data)
     .jpeg({
         quality: quality,
