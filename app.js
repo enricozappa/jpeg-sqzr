@@ -3,17 +3,21 @@ const fs = require('fs');
 const sharp = require('sharp');
 const { program } = require('commander');
 
+// TODO: add console animated cursor when compressing
+
 program
-    .option('-s, --size <integer>', 'set desired size in KB, max allowed value is 2048');
+    .option('-s, --size <integer>', 'set desired size in KB, max allowed value is 2048')
+    .option('-v, --verbose', 'launch in verbose mode');
+
 
 program.parse();
 
 const options = program.opts();
 const requestedSize = Number.parseInt(options.size);
 
-compressJPG();
+main();
 
-function compressJPG() {
+function main() {
     // Check if size parameter exists and if it's a number
     if (requestedSize) {
         if (requestedSize <= 2048) {
@@ -57,38 +61,9 @@ function compressJPG() {
                                 return console.error(err);
                             }
 
-                            // Compress image
-                            sharp(data)
-                            .jpeg({
-                                quality: 90,
-                                chromaSubsampling: '4:2:0'
-                            })
-                            .resize(1500)
-                            .toFile(`${destinationPath}/${file}`, (err, info) => {
-                                if (err)
-                                    return console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+                            let initialQuality = 100;
 
-                                // Check if file size is closer to user request
-                                // console.log('Requested size in bytes ==>', getBytes(requestedSize));
-                                // console.log('Final size in bytes ==>', parseInt(info.size));
-                                // console.log('Percentage =>', getPercentage(getBytes(requestedSize), parseInt(info.size)));
-
-                                let threshold = getPercentage(getBytes(requestedSize), parseInt(info.size));
-
-                                if (threshold < 90) {
-                                    console.log("too big");
-                                    // TODO: decrease quality
-                                } else if (threshold > 115) {
-                                    console.log("too small");
-                                    // TODO: increase quality
-                                } else {
-                                    console.log("right size");
-                                    // TODO: output file
-                                }
-                
-                                console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
-                                console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
-                            });
+                            compressImage(file, stats, data, destinationPath, initialQuality);
                         })
                     });
                 });
@@ -97,6 +72,37 @@ function compressJPG() {
             }
         } else {
             console.log('\x1b[33m%s\x1b[0m', '\nWarning: Images folder is empty \n');
+        }
+    });
+}
+
+async function compressImage(file, stats, data, destinationPath, quality) {
+    sharp(data)
+    .jpeg({
+        quality: quality,
+        chromaSubsampling: '4:2:0'
+    })
+    .resize(1500)
+    .toFile(`${destinationPath}/${file}`, (err, info) => {
+        if (err)
+            return console.log('\x1b[31m%s\x1b[0m', `Unable to process file ${file}: ${err}`);
+
+        let threshold = getPercentage(getBytes(requestedSize), parseInt(info.size));
+
+        if (threshold < 95) {
+            quality--;
+
+            if (options.verbose) {
+                console.log(`${file} still too big, with a size of ${formatBytes(info.size)}, decreasing quality to: ${quality}`);
+            }
+
+            compressImage(file, stats, data, destinationPath, quality);
+        } else {
+            console.log('\n\x1b[36m%s\x1b[0m', 'Done!');
+            console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
+            console.log('\x1b[33m%s\x1b[0m', `Quality: ${quality}`);
+            console.log('\x1b[32m%s\x1b[0m',`${formatBytes(stats.size)} => ${formatBytes(info.size)} \n`);
+            return;
         }
     });
 }
