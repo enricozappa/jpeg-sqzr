@@ -21,6 +21,8 @@ let imagesProcessed = 0;
 main();
 
 function main() {
+    spinner();
+
     // Check if size parameter exists and if it's a number
     if (requestedSize) {
         if (requestedSize <= 2048) {
@@ -70,7 +72,6 @@ function main() {
                                 console.log('\x1b[33m%s\x1b[0m', `\n${file} is equal or smaller than requested size , skipping file...`);
                             } else {
                                 let initialQuality = 100;
-                                spinner();
                                 compressImage(file, stats, data, destinationPath, initialQuality);
                             }
                         })
@@ -102,13 +103,15 @@ async function compressImage(file, stats, data, destinationPath, quality) {
             quality--;
 
             if (options.verbose) {
-                spinner('stop');
+                clearLine();
+                
                 console.log(`${file} still too big, with a size of ${formatBytes(info.size)}, decreasing quality to: ${quality}`);
             }
 
             compressImage(file, stats, data, destinationPath, quality);
         } else {
-            spinner('stop');
+            clearLine();
+
             console.log('\n\x1b[36m%s\x1b[0m', 'Done!');
             console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
             console.log('\x1b[33m%s\x1b[0m', `Quality: ${quality}`);
@@ -118,8 +121,14 @@ async function compressImage(file, stats, data, destinationPath, quality) {
             imagesProcessed++;
 
             // When all images are processed, print elapsed time
-            if (imagesProcessed == totalImages) {    
-                console.log('\x1b[35m%s\x1b[0m', `All done! Process took ${parseInt((Date.now() - timeStarted) / 1000)} seconds.\n`);
+            if (imagesProcessed == totalImages) {
+                const elapsedTime = parseInt((Date.now() - timeStarted) / 1000);
+
+                if (elapsedTime > 60) {
+                    console.log('\x1b[35m%s\x1b[0m', `All done! Process took about ${Math.round(elapsedTime / 60)} minutes.\n`);
+                } else {
+                    console.log('\x1b[35m%s\x1b[0m', `All done! Process took ${elapsedTime} seconds.\n`);
+                }
                 process.exit();
             }
 
@@ -152,17 +161,17 @@ function getPercentage(partialValue, totalValue) {
 } 
 
 // Animated spinner
-function spinner(status) {
+function spinner() {
     const symbols = ['-', '\\', '|', '/'];
     let i = 0;
     
-    if (!status) {
-        return setInterval(() => {
-            process.stdout.write('\r' + symbols[i++] + ' ');
-            i &= 3;
-          }, 100);
-    } else {
-        process.stdout.clearLine();
-        // process.stdout.cursorTo(0);
-    }
+    return setInterval(() => {
+        process.stdout.write('\r' + symbols[i++] + ' ');
+        i &= 3;
+    }, 100);
+}
+
+function clearLine() {
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
 }
