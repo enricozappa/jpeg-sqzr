@@ -3,8 +3,6 @@ const fs = require('fs');
 const sharp = require('sharp');
 const { program } = require('commander');
 
-// TODO: add console animated cursor when compressing
-
 // Store starting time
 const timeStarted = Date.now();
 
@@ -67,11 +65,14 @@ function main() {
                                 return console.error(err);
 
                             // If original file size is smaller than requested size, skip process
-                            if (stats.size <= requestedSize * 1000)
-                                return console.log('\x1b[33m%s\x1b[0m', `\n${file} is equal or smaller than requested size , skipping file...`);
-                            
-                            let initialQuality = 100;
-                            compressImage(file, stats, data, destinationPath, initialQuality);
+                            if (stats.size <= requestedSize * 1000) {
+                                imagesProcessed++;
+                                console.log('\x1b[33m%s\x1b[0m', `\n${file} is equal or smaller than requested size , skipping file...`);
+                            } else {
+                                let initialQuality = 100;
+                                spinner();
+                                compressImage(file, stats, data, destinationPath, initialQuality);
+                            }
                         })
                     });
                 });
@@ -101,11 +102,13 @@ async function compressImage(file, stats, data, destinationPath, quality) {
             quality--;
 
             if (options.verbose) {
+                spinner('stop');
                 console.log(`${file} still too big, with a size of ${formatBytes(info.size)}, decreasing quality to: ${quality}`);
             }
 
             compressImage(file, stats, data, destinationPath, quality);
         } else {
+            spinner('stop');
             console.log('\n\x1b[36m%s\x1b[0m', 'Done!');
             console.log('\x1b[34m%s\x1b[0m', `Filename: ${file}`);
             console.log('\x1b[33m%s\x1b[0m', `Quality: ${quality}`);
@@ -115,8 +118,9 @@ async function compressImage(file, stats, data, destinationPath, quality) {
             imagesProcessed++;
 
             // When all images are processed, print elapsed time
-            if (imagesProcessed == totalImages) {
+            if (imagesProcessed == totalImages) {    
                 console.log('\x1b[35m%s\x1b[0m', `All done! Process took ${parseInt((Date.now() - timeStarted) / 1000)} seconds.\n`);
+                process.exit();
             }
 
             return;
@@ -146,3 +150,19 @@ function getBytes(value) {
 function getPercentage(partialValue, totalValue) {
     return parseInt((100 * partialValue) / totalValue);
 } 
+
+// Animated spinner
+function spinner(status) {
+    const symbols = ['-', '\\', '|', '/'];
+    let i = 0;
+    
+    if (!status) {
+        return setInterval(() => {
+            process.stdout.write('\r' + symbols[i++] + ' ');
+            i &= 3;
+          }, 100);
+    } else {
+        process.stdout.clearLine();
+        // process.stdout.cursorTo(0);
+    }
+}
