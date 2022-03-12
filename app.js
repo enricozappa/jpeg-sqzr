@@ -63,12 +63,14 @@ function main() {
 
                         // Parse file
                         fs.readFile(filePath, (err, data) => {
-                            if (err) {
+                            if (err)
                                 return console.error(err);
-                            }
 
+                            // If original file size is smaller than requested size, skip process
+                            if (stats.size <= requestedSize * 1000)
+                                return console.log('\x1b[33m%s\x1b[0m', `\n${file} is equal or smaller than requested size , skipping file...`);
+                            
                             let initialQuality = 100;
-
                             compressImage(file, stats, data, destinationPath, initialQuality);
                         })
                     });
@@ -83,8 +85,6 @@ function main() {
 }
 
 async function compressImage(file, stats, data, destinationPath, quality) {
-    // TODO: if original jpeg size is smaller then desired size, prevent compression and log a message
-
     sharp(data)
     .jpeg({
         quality: quality,
