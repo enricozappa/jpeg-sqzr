@@ -8,7 +8,7 @@ How to use:
 1. Clone this repository. 
 2. Make sure you have **npm** and the most recent LTS **Node** version.
 3. Inside the project folder, launch `npm install` from the command line.
-4. Put uncompressed jpegs inside **images** folder. Files must be larger than 2mb!
+4. Put jpegs you want to shrink inside **images** folder. Files must be larger than 2mb!
 5. Launch `node app.js -s 500` (example) from the command line.
 
 Type `node app.js -h` for help.
