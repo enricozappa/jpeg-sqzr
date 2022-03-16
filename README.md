@@ -3,6 +3,8 @@ Image compressor that reduce the size of one or more JPEG to the required size.
 
 It is designed to produce images for the web, so jpegs are resized to 1500px (width) and it is not possible to obtain a file larger than 2mb.
 
+![](https://media.giphy.com/media/hRTAHXlPnxqF3iukFI/giphy.gif)
+
 How to use:
 
 1. Clone this repository. 
