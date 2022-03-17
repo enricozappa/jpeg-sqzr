@@ -28,10 +28,12 @@ function main() {
         if (requestedSize <= 2048) {
             console.log('\x1b[35m%s\x1b[0m', '\nDesired size =>', `~ ${requestedSize} KB`);
         } else {
-            return console.log('\x1b[31m%s\x1b[0m', `\nError: max allowed KB value is 2048"\n`);
+            console.log('\x1b[31m%s\x1b[0m', `\nError: max allowed KB value is 2048"\n`);
+            process.exit();
         }
     } else {
-        return console.log('\x1b[31m%s\x1b[0m', `\nError: you must provide a size in KB. Example: node app.js -s 500"\n`);
+        console.log('\x1b[31m%s\x1b[0m', `\nError: you must provide a size in KB. Example: node app.js -s 500"\n`);
+        process.exit();
     }
 
     // Get images path
@@ -79,9 +81,11 @@ function main() {
                 });
             } else {
                 console.log('\x1b[33m%s\x1b[0m', '\nWarning: No jpegs found \n');
+                process.exit();
             }
         } else {
             console.log('\x1b[33m%s\x1b[0m', '\nWarning: Images folder is empty \n');
+            process.exit();
         }
     });
 }
