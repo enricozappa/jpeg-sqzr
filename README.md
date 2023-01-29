@@ -1,5 +1,5 @@
 # auto-jpeg-compressor
-Image compressor that reduce the size of one or more JPEG to the required size.
+Asynchronous image compressor that reduce the size of one or more JPEG, compressing all of it to the required size.
 
 It is designed to produce images for the web, so jpegs are resized to 1500px (width) and it is not possible to obtain a file larger than 2mb.
 
