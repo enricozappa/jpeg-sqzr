@@ -1,5 +1,5 @@
-# auto-jpeg-compressor
-Asynchronous image compressor that reduce the size of one or more JPEG, compressing all of it to the required size.
+# jpeg-sqzr (jpeg squeezer)
+CLI tool that shrink jpegs to desired size, built in Node.js.
 
 It is designed to produce images for the web, so jpegs are resized to 1500px (width) and it is not possible to obtain a file larger than 2mb.
 
